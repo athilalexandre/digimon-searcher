@@ -1,6 +1,8 @@
 // Script da Landing Page – Consome a API local em http://localhost:3000
 
-const API_BASE = 'http://localhost:3000';
+const API_BASE = (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app'))
+  ? '/api'
+  : 'http://localhost:3000';
 const USER_LANG = (window.USER_LANG || 'en').slice(0, 2);
 
 const searchInput = document.getElementById('searchInput');

@@ -1,0 +1,31 @@
+const path = require('path');
+const digimons = require(path.join(process.cwd(), 'backend', 'data', 'digimons.json'));
+
+function normalizar(texto) {
+  if (typeof texto !== 'string') return '';
+  return texto.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().trim();
+}
+
+module.exports = (req, res) => {
+  try {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const page = Math.max(parseInt(url.searchParams.get('page') || '1', 10), 1);
+    const limit = Math.max(parseInt(url.searchParams.get('limit') || '20', 10), 1);
+
+    // embaralha na home para não ficar alfabética
+    const shuffled = [...digimons].sort(() => Math.random() - 0.5);
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const resultados = shuffled.slice(startIndex, endIndex);
+
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ pagina: page, limite: limit, total: digimons.length, resultados }));
+  } catch (e) {
+    res.statusCode = 500;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ erro: 'Erro interno do servidor', detalhes: e.message }));
+  }
+};
+
+
