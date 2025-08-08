@@ -16,7 +16,7 @@ const pageInfo = document.getElementById('pageInfo');
 const detailsTemplate = document.getElementById('detailsTemplate');
 
 let currentPage = 1;
-let currentLimit = 4;
+let currentLimit = 4; // Home padrão
 // Converte URL de thumbnail do Wikimon para a imagem original (sem /thumb/)
 function wikimonThumbToOriginal(url) {
   try {
@@ -322,7 +322,8 @@ async function fetchByLevel(level) {
     return;
   }
   try {
-    const res = await fetch(`${API_BASE}/digimons/nivel/${encodeURIComponent(trimmed)}`);
+    const page = 1;
+    const res = await fetch(`${API_BASE}/digimons/nivel/${encodeURIComponent(trimmed)}?page=${page}&limit=8`);
     if (res.status === 404) {
       showAlert('Nenhum Digimon encontrado para o nível selecionado.');
       cardsContainer.innerHTML = '';
@@ -333,9 +334,9 @@ async function fetchByLevel(level) {
     const data = await res.json();
     currentMode = 'level';
     currentQuery.level = trimmed;
-    currentPage = 1;
+    currentPage = data.pagina || 1;
     currentTotal = data.total;
-    renderList(data.resultados, 1, data.total, data.total);
+    renderList(data.resultados, currentPage, data.total, 8);
   } catch (err) {
     showAlert(err.message || 'Erro ao comunicar com a API.', 'danger');
   }
@@ -360,11 +361,13 @@ prevPageBtn.addEventListener('click', () => {
   if (currentPage <= 1) return;
   if (currentMode === 'list') fetchPage(currentPage - 1);
   else if (currentMode === 'search') fetchSearchPage(currentPage - 1);
+  else if (currentMode === 'level') fetchByLevel(currentQuery.level);
 });
 
 nextPageBtn.addEventListener('click', () => {
   if (currentMode === 'list') fetchPage(currentPage + 1);
   else if (currentMode === 'search') fetchSearchPage(currentPage + 1);
+  else if (currentMode === 'level') fetchByLevel(currentQuery.level);
 });
 
 // Carrega a primeira página ao abrir

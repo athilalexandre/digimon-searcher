@@ -11,10 +11,33 @@ function normalizar(texto) {
     .trim();
 }
 
+function distance(a, b) {
+  const m = a.length; const n = b.length;
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i += 1) dp[i][0] = i;
+  for (let j = 0; j <= n; j += 1) dp[0][j] = j;
+  for (let i = 1; i <= m; i += 1) {
+    for (let j = 1; j <= n; j += 1) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + cost,
+      );
+    }
+  }
+  return dp[m][n];
+}
+
 module.exports = async (req, res) => {
   try {
+    const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
     const { rest = [] } = req.query || {};
-    const parts = Array.isArray(rest) ? rest : [rest];
+    let parts = Array.isArray(rest) ? rest : [rest];
+    // Vercel pode fornecer "rest" como string única "nivel/Ultimate"
+    if (parts.length === 1 && typeof parts[0] === 'string' && parts[0].includes('/')) {
+      parts = parts[0].split('/').filter(Boolean);
+    }
 
     // /nivel/:nivel
     if (parts[0] === 'nivel') {
@@ -24,7 +47,12 @@ module.exports = async (req, res) => {
         return niveis.some((n) => normalizar(n) === nivelParam);
       });
       if (filtrados.length === 0) return send404(res, 'Nenhum Digimon encontrado para o nível informado.');
-      return sendJSON(res, { total: filtrados.length, resultados: filtrados });
+      const page = Math.max(parseInt(url.searchParams.get('page') || '1', 10), 1);
+      const limit = Math.max(parseInt(url.searchParams.get('limit') || '8', 10), 1);
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      const resultados = filtrados.slice(startIndex, endIndex);
+      return sendJSON(res, { pagina: page, limite: limit, total: filtrados.length, resultados });
     }
 
     // /tipo/:tipo
@@ -35,23 +63,36 @@ module.exports = async (req, res) => {
         return tipos.some((t) => normalizar(t) === tipoParam);
       });
       if (filtrados.length === 0) return send404(res, 'Nenhum Digimon encontrado para o tipo informado.');
-      return sendJSON(res, { total: filtrados.length, resultados: filtrados });
+      const page = Math.max(parseInt(url.searchParams.get('page') || '1', 10), 1);
+      const limit = Math.max(parseInt(url.searchParams.get('limit') || '8', 10), 1);
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      const resultados = filtrados.slice(startIndex, endIndex);
+      return sendJSON(res, { pagina: page, limite: limit, total: filtrados.length, resultados });
     }
 
     // /:nome
     const nomeRaw = decodeURIComponent(parts[0] || '');
     const nomeParam = normalizar(nomeRaw);
     let encontrado = digimons.find((d) => normalizar(d.nome) === nomeParam);
-    // fallback: tenta contains quando não houver match exato
     if (!encontrado) {
       encontrado = digimons.find((d) => normalizar(d.nome).includes(nomeParam));
     }
-    // fallback: tenta remover conteúdos entre parênteses (ex.: "Lucemon (Satan Mode)")
     if (!encontrado && /\(.*\)/.test(nomeRaw)) {
       const base = nomeRaw.replace(/\s*\(.+?\)\s*/g, '').trim();
       const baseNorm = normalizar(base);
       encontrado = digimons.find((d) => normalizar(d.nome) === baseNorm) ||
         digimons.find((d) => normalizar(d.nome).includes(baseNorm));
+    }
+    if (!encontrado) {
+      // fuzzy: aceita distância <= 2
+      let best = null; let bestScore = Infinity;
+      for (const d of digimons) {
+        const dn = normalizar(d.nome);
+        const dist = distance(dn, nomeParam);
+        if (dist < bestScore) { best = d; bestScore = dist; }
+      }
+      if (best && bestScore <= 2) encontrado = best;
     }
     if (!encontrado) return send404(res, 'Digimon não encontrado.');
     return sendJSON(res, encontrado);
