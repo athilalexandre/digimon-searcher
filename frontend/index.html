@@ -18,11 +18,11 @@
   </head>
   <body>
     <header class="bg-digimon text-light py-4 shadow-sm">
-      <div class="container d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+      <div class="container d-flex flex-column gap-3">
         <h1 class="m-0 fw-bold">Digimon Searcher</h1>
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-          <input id="searchInput" type="text" class="form-control" placeholder="Digite o nome do Digimon (ex.: Agumon)" />
-          <button id="searchBtn" class="btn btn-warning fw-semibold">Buscar</button>
+        <div class="search-wrapper">
+          <input id="searchInput" type="text" class="form-control search-input" placeholder="Digite o nome do Digimon (ex.: Agumon)" />
+          <button id="searchBtn" class="btn btn-warning fw-semibold search-btn">Buscar</button>
           <select id="levelFilter" class="form-select">
             <option value="">Filtrar por nível</option>
             <option value="Child">Child</option>
@@ -49,16 +49,28 @@
         <div id="cardsContainer" class="row g-3"></div>
         <template id="detailsTemplate">
           <div class="modal fade" id="digimonModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
               <div class="modal-content bg-digimon text-light">
                 <div class="modal-header">
                   <h5 class="modal-title" id="digimonModalLabel"></h5>
                   <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                  <img id="digimonModalImg" class="img-fluid mb-3" alt="Imagem do Digimon" />
-                  <p id="digimonModalDesc" class="mb-3"></p>
-                  <div id="digimonModalTechs"></div>
+                  <div class="row g-4">
+                    <div class="col-12 col-md-5">
+                      <img id="digimonModalImg" class="img-fluid mb-3 w-100" alt="Imagem do Digimon" />
+                      <div id="digimonModalFields" class="mt-2"></div>
+                    </div>
+                    <div class="col-12 col-md-7">
+                      <div class="row g-2 mb-3">
+                        <div class="col-12 col-sm-4"><div class="small text-secondary">Tipo</div><div id="metaTipo" class="fw-semibold"></div></div>
+                        <div class="col-12 col-sm-4"><div class="small text-secondary">Atributo</div><div id="metaAtributo" class="fw-semibold"></div></div>
+                        <div class="col-12 col-sm-4"><div class="small text-secondary">Nível</div><div id="metaNivel" class="fw-semibold"></div></div>
+                      </div>
+                      <p id="digimonModalDesc" class="mb-3"></p>
+                      <div id="digimonModalTechs"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -66,10 +78,19 @@
         </template>
       </section>
     </main>
-
-    <footer class="bg-dark text-center text-light py-4 mt-auto">
+    <footer class="bg-dark text-center text-light py-4 mt-auto border-top">
       <div class="container">
-        <p class="m-0 small">Projeto não oficial inspirado em Digimon Story: Cyber Sleuth.</p>
+        <p class="m-0 small">
+          Feito por
+          <a class="fw-semibold link-warning text-decoration-none" href="https://github.com/athilalexandre" target="_blank" rel="noopener noreferrer">Athila Alexandre</a>
+          · Todos os direitos das marcas pertencem à Bandai.
+          Dados baseados em
+          <a class="link-info text-decoration-none" href="https://wikimon.net" target="_blank" rel="noopener noreferrer">Wikimon</a>
+          e na
+          <a class="link-info text-decoration-none" href="https://digi-api.com/" target="_blank" rel="noopener noreferrer">Digi-API</a>.
+          Veja a
+          <a class="link-light text-decoration-underline" href="api-docs.html">documentação da nossa API</a>.
+        </p>
       </div>
     </footer>
 

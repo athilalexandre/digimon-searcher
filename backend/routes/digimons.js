@@ -1,4 +1,5 @@
 const express = require('express');
+const { fetchWikimonDetails } = require('../services/wikimon');
 
 const router = express.Router();
 
@@ -68,7 +69,9 @@ router.get('/', (req, res) => {
   const startIndex = (page - 1) * limit;
   const endIndex = startIndex + limit;
 
-  const resultados = digimons.slice(startIndex, endIndex);
+  // embaralha ordem na home para não ficar alfabética
+  const shuffled = [...digimons].sort(() => Math.random() - 0.5);
+  const resultados = shuffled.slice(startIndex, endIndex);
 
   res.json({
     pagina: page,
@@ -136,5 +139,21 @@ router.get('/:nome', (req, res) => {
 });
 
 module.exports = router;
+
+// GET /digimons/:nome/detalhes-wikimon → enriquece sob demanda
+router.get('/:nome/detalhes-wikimon', async (req, res, next) => {
+  try {
+    const { normalizar, digimons } = req.app.locals;
+    const nomeParam = normalizar(req.params.nome);
+    const encontrado = digimons.find((d) => normalizar(d.nome) === nomeParam);
+    if (!encontrado) {
+      return res.status(404).json({ erro: 'Digimon não encontrado.' });
+    }
+    const detalhes = await fetchWikimonDetails(encontrado.nome);
+    return res.json(detalhes);
+  } catch (e) {
+    return next(e);
+  }
+});
 
 

@@ -14,7 +14,10 @@ const pageInfo = document.getElementById('pageInfo');
 const detailsTemplate = document.getElementById('detailsTemplate');
 
 let currentPage = 1;
-let currentLimit = 8;
+let currentLimit = 4;
+let currentMode = 'list'; // 'list' | 'search' | 'level'
+let currentQuery = { name: '', level: '' };
+let currentTotal = 0;
 
 function showAlert(message, type = 'info') {
   alertArea.innerHTML = `
@@ -26,7 +29,7 @@ function clearAlert() {
   alertArea.innerHTML = '';
 }
 
-function createCard(d) {
+function createCard(d, minimal = false) {
   const tipos = Array.isArray(d.tipos) && d.tipos.length ? d.tipos : (d.tipo ? [d.tipo] : []);
   const atributos = Array.isArray(d.atributos) && d.atributos.length ? d.atributos : (d.atributo ? [d.atributo] : []);
   const niveis = Array.isArray(d.niveis) && d.niveis.length ? d.niveis : (d.nivel ? [d.nivel] : []);
@@ -41,15 +44,28 @@ function createCard(d) {
 
   const imgSrc = Array.isArray(d.imagens) && d.imagens.length ? d.imagens[0] : d.imagem;
 
+  if (minimal) {
+    const nivelTxt = niveis[0] || d.nivel || '';
+    return `
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+      <div class="card h-100 digimon-card" data-nome="${d.nome}">
+        <img src="${imgSrc}" class="card-img-top p-3" alt="Imagem de ${d.nome}" height="220" />
+        <div class="card-body">
+          <h5 class="card-title">${d.nome} ${nivelTxt ? `(${nivelTxt})` : ''}</h5>
+        </div>
+      </div>
+    </div>`;
+  }
+
   return `
   <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
     <div class="card h-100 digimon-card" data-nome="${d.nome}">
       <img src="${imgSrc}" class="card-img-top p-3" alt="Imagem de ${d.nome}" height="220" />
       <div class="card-body">
         <h5 class="card-title">${d.nome}</h5>
-        <p class="card-text mb-1"><strong>Tipos:</strong> ${tipos.join(', ') || '—'}</p>
-        <p class="card-text mb-1"><strong>Atributos:</strong> ${atributos.join(', ') || '—'}</p>
-        <p class="card-text mb-1"><strong>Níveis:</strong> ${niveis.join(', ') || '—'}</p>
+        <p class="card-text mb-1"><strong>Tipo:</strong> ${tipos.join(', ') || '—'}</p>
+        <p class="card-text mb-1"><strong>Atributo:</strong> ${atributos.join(', ') || '—'}</p>
+        <p class="card-text mb-1"><strong>Nível:</strong> ${niveis.join(', ') || '—'}</p>
         <div class="mt-2"><strong>Categoria:</strong><div class="mt-1">${camposBadges || '—'}</div></div>
       </div>
     </div>
@@ -65,7 +81,8 @@ function renderList(resultados = [], pagina = 1, total = 0, limite = currentLimi
   }
 
   clearAlert();
-  cardsContainer.innerHTML = resultados.map(createCard).join('');
+  const minimal = currentMode === 'search';
+  cardsContainer.innerHTML = resultados.map((d) => createCard(d, minimal)).join('');
   // Vincula clique aos cards para abrir detalhes
   document.querySelectorAll('.digimon-card').forEach((el) => {
     el.addEventListener('click', () => openDetails(el.getAttribute('data-nome')));
@@ -88,6 +105,20 @@ async function openDetails(nome) {
     const modalEl = document.getElementById('digimonModal');
     document.getElementById('digimonModalLabel').textContent = d.nome;
     document.getElementById('digimonModalImg').src = (Array.isArray(d.imagens) && d.imagens[0]) || d.imagem || '';
+    // Preenche meta e fields
+    const tiposMeta = Array.isArray(d.tipos) && d.tipos.length ? d.tipos : (d.tipo ? [d.tipo] : []);
+    const atributosMeta = Array.isArray(d.atributos) && d.atributos.length ? d.atributos : (d.atributo ? [d.atributo] : []);
+    const niveisMeta = Array.isArray(d.niveis) && d.niveis.length ? d.niveis : (d.nivel ? [d.nivel] : []);
+    const fieldsMeta = Array.isArray(d.camposDetalhes) ? d.camposDetalhes : (d.campos || []).map((nome) => ({ nome, imagem: null }));
+    const fieldsHtml = (fieldsMeta || [])
+      .map((c) => c.imagem
+        ? `<span class="me-2 d-inline-flex align-items-center mb-2"><img src="${c.imagem}" alt="${c.nome}" title="${c.nome}" style="height:22px;width:22px;object-fit:contain;margin-right:6px;"/><span class="badge badge-digimon">${c.nome}</span></span>`
+        : `<span class=\"badge badge-digimon me-2 mb-2\">${c.nome}</span>`)
+      .join('') || '<span class="text-secondary">—</span>';
+    document.getElementById('metaTipo').textContent = (tiposMeta || []).join(', ') || '—';
+    document.getElementById('metaAtributo').textContent = (atributosMeta || []).join(', ') || '—';
+    document.getElementById('metaNivel').textContent = (niveisMeta || []).join(', ') || '—';
+    document.getElementById('digimonModalFields').innerHTML = fieldsHtml;
     // Seleciona descrição pela língua do usuário se estiver disponível (da DAPI)
     let desc = '';
     if (Array.isArray(d.descricoes) && d.descricoes.length) {
@@ -99,8 +130,29 @@ async function openDetails(nome) {
       }
       if (!desc) desc = d.descricoes[0].description || '';
     }
-    // Fallback para descrição extraída do Wikimon
-    if (!desc) desc = d.descricao || '';
+    // Fallback: tentar Wikimon sob demanda
+    if (!desc) {
+      try {
+        const tryFetch = async (nome) => {
+          const wk = await fetch(`${API_BASE}/digimons/${encodeURIComponent(nome)}/detalhes-wikimon`);
+          if (!wk.ok) return null;
+          return wk.json();
+        };
+        let wj = await tryFetch(d.nome);
+        if (!wj && d.nome.includes('(')) {
+          const base = d.nome.replace(/\s*\(.+?\)\s*/g, '').trim();
+          wj = await tryFetch(base);
+        }
+        if (wj) {
+          desc = wj.descricao || '';
+          if (wj.imagemUrl) document.getElementById('digimonModalImg').src = wj.imagemUrl;
+          if (Array.isArray(wj.ataques) && wj.ataques.length) {
+            const techsHtml2 = wj.ataques.slice(0, 10).map((t) => `<div class=\"mb-2\"><strong>${t.nome}:</strong> ${t.descricao}</div>`).join('');
+            document.getElementById('digimonModalTechs').innerHTML = techsHtml2;
+          }
+        }
+      } catch {}
+    }
     document.getElementById('digimonModalDesc').textContent = desc || 'Descrição não disponível para o seu idioma.';
 
     const techs = Array.isArray(d.tecnicas) && d.tecnicas.length ? d.tecnicas : (Array.isArray(d.ataques) ? d.ataques : []);
@@ -127,11 +179,25 @@ async function fetchPage(page = 1) {
     const res = await fetch(`${API_BASE}/digimons?page=${page}&limit=${currentLimit}`);
     if (!res.ok) throw new Error('Falha ao carregar lista de Digimons.');
     const data = await res.json();
+    currentMode = 'list';
     currentPage = data.pagina;
+    currentTotal = data.total;
     renderList(data.resultados, data.pagina, data.total, data.limite);
   } catch (err) {
     showAlert(err.message || 'Erro ao comunicar com a API.', 'danger');
   }
+}
+
+async function fetchSearchPage(page = 1) {
+  const name = currentQuery.name;
+  const url = `${API_BASE}/digimons/busca?nome=${encodeURIComponent(name)}&page=${page}&limit=8`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Falha ao buscar Digimon.');
+  const data = await res.json();
+  currentMode = 'search';
+  currentPage = data.pagina;
+  currentTotal = data.total;
+  renderList(data.resultados, data.pagina, data.total, data.limite);
 }
 
 async function fetchByName(name) {
@@ -141,8 +207,8 @@ async function fetchByName(name) {
     return;
   }
   try {
-    // Usa busca flexível (parcial, case-insensitive, tolerante a acentos)
-    const res = await fetch(`${API_BASE}/digimons/busca?nome=${encodeURIComponent(trimmed)}&page=1&limit=${currentLimit}`);
+    currentQuery.name = trimmed;
+    const res = await fetch(`${API_BASE}/digimons/busca?nome=${encodeURIComponent(trimmed)}&page=1&limit=8`);
     if (!res.ok) throw new Error('Falha ao buscar Digimon.');
     const data = await res.json();
     if (!data.resultados || data.resultados.length === 0) {
@@ -151,6 +217,9 @@ async function fetchByName(name) {
       pageInfo.textContent = '';
       return;
     }
+    currentMode = 'search';
+    currentPage = data.pagina;
+    currentTotal = data.total;
     renderList(data.resultados, data.pagina, data.total, data.limite);
   } catch (err) {
     showAlert(err.message || 'Erro ao comunicar com a API.', 'danger');
@@ -174,6 +243,10 @@ async function fetchByLevel(level) {
     }
     if (!res.ok) throw new Error('Falha ao filtrar por nível.');
     const data = await res.json();
+    currentMode = 'level';
+    currentQuery.level = trimmed;
+    currentPage = 1;
+    currentTotal = data.total;
     renderList(data.resultados, 1, data.total, data.total);
   } catch (err) {
     showAlert(err.message || 'Erro ao comunicar com a API.', 'danger');
@@ -196,11 +269,14 @@ levelFilter.addEventListener('change', () => {
 });
 
 prevPageBtn.addEventListener('click', () => {
-  if (currentPage > 1) fetchPage(currentPage - 1);
+  if (currentPage <= 1) return;
+  if (currentMode === 'list') fetchPage(currentPage - 1);
+  else if (currentMode === 'search') fetchSearchPage(currentPage - 1);
 });
 
 nextPageBtn.addEventListener('click', () => {
-  fetchPage(currentPage + 1);
+  if (currentMode === 'list') fetchPage(currentPage + 1);
+  else if (currentMode === 'search') fetchSearchPage(currentPage + 1);
 });
 
 // Carrega a primeira página ao abrir
