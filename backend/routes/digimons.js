@@ -1,5 +1,6 @@
 const express = require('express');
 const { fetchWikimonDetails } = require('../services/wikimon');
+const logger = require('../utils/logger');
 
 const router = express.Router();
 
@@ -72,6 +73,7 @@ router.get('/', (req, res) => {
   // embaralha ordem na home para não ficar alfabética
   const shuffled = [...digimons].sort(() => Math.random() - 0.5);
   const resultados = shuffled.slice(startIndex, endIndex);
+  logger.debug('List digimons', { page, limit, total: digimons.length, startIndex, endIndex, returned: resultados.length });
 
   res.json({
     pagina: page,
@@ -92,6 +94,7 @@ router.get('/nivel/:nivel', (req, res) => {
   });
 
   if (filtrados.length === 0) {
+    logger.warn('No digimon for level', { nivel: req.params.nivel });
     return res.status(404).json({
       erro: 'Nenhum Digimon encontrado para o nível informado.',
       nivel: req.params.nivel
@@ -112,6 +115,7 @@ router.get('/tipo/:tipo', (req, res) => {
   });
 
   if (filtrados.length === 0) {
+    logger.warn('No digimon for type', { tipo: req.params.tipo });
     return res.status(404).json({
       erro: 'Nenhum Digimon encontrado para o tipo informado.',
       tipo: req.params.tipo
@@ -129,6 +133,7 @@ router.get('/:nome', (req, res) => {
   const encontrado = digimons.find((d) => normalizar(d.nome) === nomeParam);
 
   if (!encontrado) {
+    logger.warn('Digimon not found', { nome: req.params.nome });
     return res.status(404).json({
       erro: 'Digimon não encontrado.',
       nome: req.params.nome
@@ -147,11 +152,14 @@ router.get('/:nome/detalhes-wikimon', async (req, res, next) => {
     const nomeParam = normalizar(req.params.nome);
     const encontrado = digimons.find((d) => normalizar(d.nome) === nomeParam);
     if (!encontrado) {
+      logger.warn('Wikimon details request for unknown digimon', { nome: req.params.nome });
       return res.status(404).json({ erro: 'Digimon não encontrado.' });
     }
     const detalhes = await fetchWikimonDetails(encontrado.nome);
+    logger.info('Fetched wikimon details', { nome: encontrado.nome, temImagem: !!detalhes.imagemUrl, ataques: detalhes.ataques?.length || 0 });
     return res.json(detalhes);
   } catch (e) {
+    logger.error('Erro ao buscar detalhes no Wikimon', { message: e.message, stack: e.stack });
     return next(e);
   }
 });

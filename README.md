@@ -59,22 +59,25 @@ Frontend:
 ```bash
 cd frontend
 npm install
-npm run dev  # http://localhost:5173
+npm run dev  # http://localhost:3001
 ```
 
 ## API (Endpoints)
-- `GET /digimons?page=<num>&limit=<num>`: lista paginada
+- `GET /digimons?page=<num>&limit=<num>`: lista paginada (home já retorna embaralhado)
 - `GET /digimons/:nome`: por nome (case-insensitive, tolerante a acentos)
 - `GET /digimons/nivel/:nivel`: por nível
 - `GET /digimons/tipo/:tipo`: por tipo
 - `GET /digimons/busca?nome=&nivel=&tipo=&atributo=&campo=&page=&limit=`: busca flexível
+- `GET /digimons/:nome/detalhes-wikimon`: enriquecimento sob demanda (descrição/ataques)
 
 ## Frontend
 - Busca por nome e filtro por nível
+- Lista inicial (Home) aleatória com 4 cards por página; resultados de busca mostram 8 por página
 - Cards responsivos; clique abre modal com:
-  - imagem (Wikimon/DAPI/local)
-  - descrição no idioma do navegador (pt/en/ja com fallback)
+  - imagem idêntica à exibida no card
+  - descrição com botões PT‑BR / EN / JP (traduz via Digi‑API quando disponível, ou serviço público LibreTranslate)
   - técnicas (quando disponíveis)
+  - fields com ícones clicáveis para abrir a imagem original no Wikimon
 
 ## Sincronização de Dados
 - `npm start` (backend) executa um bootstrap que valida o dataset e sincroniza quando necessário.
@@ -84,6 +87,17 @@ npm run sync           # baixa todos os Digimons da DAPI
 npm run images         # baixa imagens localmente e atualiza caminhos para /static
 npm run enrich:wikimon # enriquece com imagem/descrição/técnicas do Wikimon
 ```
+
+## Logs e Depuração
+- Backend: habilite logs detalhados com `DS_DEBUG=1` (ou `DEBUG=1`). Ex.:
+  ```powershell
+  $env:DS_DEBUG="1"; npm start
+  ```
+- Frontend: use o Console do navegador para ver logs `[modal]` e `[translate]`.
+
+## Créditos e Links
+- Dados baseados na [Digi‑API](https://digi-api.com/) e [Wikimon](https://wikimon.net/)
+- Documentação rápida da API local: `frontend/api-docs.html`
 
 ## Licença
 CC BY‑NC‑SA 4.0 – Projeto educacional, sem afiliação oficial com Bandai. Fontes: DAPI (digi-api.com) e Wikimon (wikimon.net).

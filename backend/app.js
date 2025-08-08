@@ -8,6 +8,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const path = require('path');
+const logger = require('./utils/logger');
 
 // Carrega dados locais do arquivo JSON
 const digimonsDataPath = path.join(__dirname, 'data', 'digimons.json');
@@ -20,7 +21,11 @@ const app = express();
 // Middlewares globais
 app.use(cors()); // Habilita CORS para permitir acesso do frontend
 app.use(express.json()); // Trata JSON no corpo das requisições
-app.use(morgan('dev')); // Log amigável em desenvolvimento
+app.use(morgan('dev'));
+app.use((req, res, next) => {
+  logger.info('HTTP Request', { method: req.method, url: req.url, query: req.query, ip: req.ip });
+  next();
+});
 // Servir arquivos estáticos (imagens baixadas localmente)
 app.use('/static', express.static(path.join(__dirname, 'public'), {
   maxAge: '7d',
@@ -74,7 +79,7 @@ app.use((req, res, next) => {
 // Garante respostas consistentes e em português
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
-  console.error(err); // Útil para depuração no servidor
+  logger.error('Unhandled Error', { message: err.message, stack: err.stack });
   const status = err.status || 500;
   res.status(status).json({
     erro: 'Ocorreu um erro ao processar sua solicitação.',
