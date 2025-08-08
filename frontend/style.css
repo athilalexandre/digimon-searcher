@@ -1,0 +1,77 @@
+:root {
+  --digimon-blue: #00bcd4;
+  --digimon-dark: #0b0f19;
+  --digimon-yellow: #ffc107;
+}
+
+html,
+body {
+  height: 100%;
+  background: linear-gradient(180deg, #0b0f19 0%, #10182b 100%);
+  color: #e9f1ff;
+}
+
+.bg-digimon {
+  background: radial-gradient(1000px 200px at 10% 10%, #0b0f19 0%, #10182b 100%),
+    linear-gradient(90deg, rgba(0, 188, 212, 0.12), rgba(0, 188, 212, 0));
+  border-bottom: 1px solid rgba(0, 188, 212, 0.25);
+}
+
+header h1 {
+  letter-spacing: 0.5px;
+}
+
+#searchInput,
+#levelFilter {
+  min-width: 240px;
+}
+
+.card {
+  background: #0e1526;
+  border: 1px solid rgba(0, 188, 212, 0.2);
+  color: #d9e6ff;
+}
+
+.card img {
+  background: #0a0f1d;
+  object-fit: contain;
+}
+
+.badge-digimon {
+  background-color: rgba(0, 188, 212, 0.15);
+  border: 1px solid rgba(0, 188, 212, 0.35);
+  color: var(--digimon-blue);
+}
+
+.btn-warning {
+  background-color: var(--digimon-yellow);
+  border-color: #e0a800;
+  color: #121212;
+}
+
+.btn-outline-primary {
+  border-color: var(--digimon-blue);
+  color: var(--digimon-blue);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--digimon-blue);
+  color: #0b0f19;
+}
+
+.text-secondary.small {
+  color: #8ea6c4 !important;
+}
+
+.alert-info {
+  background-color: rgba(0, 188, 212, 0.1);
+  border-color: rgba(0, 188, 212, 0.35);
+  color: #bfefff;
+}
+
+.alert-danger {
+  background-color: rgba(255, 71, 87, 0.08);
+  border-color: rgba(255, 71, 87, 0.35);
+}
+
+

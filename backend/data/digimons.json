@@ -1,0 +1,183 @@
+[
+  {
+    "id": 1,
+    "nome": "Agumon",
+    "tipo": "Vaccine",
+    "atributo": "Dragon",
+    "campos": ["Dragon's Roar", "Virus Busters"],
+    "nivel": "Child",
+    "imagem": "https://wikimon.net/images/8/8b/Agumon_vb.png"
+  },
+  {
+    "id": 2,
+    "nome": "Gabumon",
+    "tipo": "Data",
+    "atributo": "Beast",
+    "campos": ["Nature Spirits", "Virus Busters"],
+    "nivel": "Child",
+    "imagem": "https://wikimon.net/images/7/7a/Gabumon_vb.png"
+  },
+  {
+    "id": 3,
+    "nome": "Patamon",
+    "tipo": "Vaccine",
+    "atributo": "Mammal",
+    "campos": ["Wind Guardians", "Virus Busters"],
+    "nivel": "Child",
+    "imagem": "https://wikimon.net/images/3/3a/Patamon_vb.png"
+  },
+  {
+    "id": 4,
+    "nome": "Tentomon",
+    "tipo": "Vaccine",
+    "atributo": "Insectoid",
+    "campos": ["Jungle Troopers", "Wind Guardians"],
+    "nivel": "Child",
+    "imagem": "https://wikimon.net/images/3/3b/Tentomon_vb.png"
+  },
+  {
+    "id": 5,
+    "nome": "Palmon",
+    "tipo": "Data",
+    "atributo": "Plant",
+    "campos": ["Jungle Troopers", "Wind Guardians"],
+    "nivel": "Child",
+    "imagem": "https://wikimon.net/images/2/2c/Palmon_vb.png"
+  },
+  {
+    "id": 6,
+    "nome": "Gomamon",
+    "tipo": "Vaccine",
+    "atributo": "Aquan",
+    "campos": ["Deep Savers"],
+    "nivel": "Child",
+    "imagem": "https://wikimon.net/images/4/49/Gomamon_vb.png"
+  },
+  {
+    "id": 7,
+    "nome": "Gatomon",
+    "tipo": "Vaccine",
+    "atributo": "Holy Beast",
+    "campos": ["Virus Busters"],
+    "nivel": "Adult",
+    "imagem": "https://wikimon.net/images/4/4c/Tailmon_vb.png"
+  },
+  {
+    "id": 8,
+    "nome": "Greymon",
+    "tipo": "Vaccine",
+    "atributo": "Dragon",
+    "campos": ["Dragon's Roar", "Metal Empire"],
+    "nivel": "Adult",
+    "imagem": "https://wikimon.net/images/7/70/Greymon_vb.png"
+  },
+  {
+    "id": 9,
+    "nome": "Garurumon",
+    "tipo": "Vaccine",
+    "atributo": "Beast",
+    "campos": ["Nature Spirits"],
+    "nivel": "Adult",
+    "imagem": "https://wikimon.net/images/4/42/Garurumon_vb.png"
+  },
+  {
+    "id": 10,
+    "nome": "Kabuterimon",
+    "tipo": "Vaccine",
+    "atributo": "Insectoid",
+    "campos": ["Jungle Troopers"],
+    "nivel": "Adult",
+    "imagem": "https://wikimon.net/images/3/3a/Kabuterimon_vb.png"
+  },
+  {
+    "id": 11,
+    "nome": "Togemon",
+    "tipo": "Data",
+    "atributo": "Plant",
+    "campos": ["Jungle Troopers"],
+    "nivel": "Adult",
+    "imagem": "https://wikimon.net/images/4/49/Togemon_vb.png"
+  },
+  {
+    "id": 12,
+    "nome": "Ikkakumon",
+    "tipo": "Vaccine",
+    "atributo": "Aquan",
+    "campos": ["Deep Savers"],
+    "nivel": "Adult",
+    "imagem": "https://wikimon.net/images/9/9a/Ikkakumon_vb.png"
+  },
+  {
+    "id": 13,
+    "nome": "Angemon",
+    "tipo": "Vaccine",
+    "atributo": "Angel",
+    "campos": ["Virus Busters"],
+    "nivel": "Adult",
+    "imagem": "https://wikimon.net/images/9/90/Angemon_vb.png"
+  },
+  {
+    "id": 14,
+    "nome": "MetalGreymon",
+    "tipo": "Vaccine",
+    "atributo": "Android",
+    "campos": ["Dragon's Roar", "Metal Empire"],
+    "nivel": "Perfect",
+    "imagem": "https://wikimon.net/images/9/9e/Metalgreymon_vb.png"
+  },
+  {
+    "id": 15,
+    "nome": "WereGarurumon",
+    "tipo": "Vaccine",
+    "atributo": "Beast Man",
+    "campos": ["Nature Spirits", "Metal Empire"],
+    "nivel": "Perfect",
+    "imagem": "https://wikimon.net/images/5/5f/Weregarurumon_vb.png"
+  },
+  {
+    "id": 16,
+    "nome": "Lillymon",
+    "tipo": "Data",
+    "atributo": "Fairy",
+    "campos": ["Wind Guardians"],
+    "nivel": "Perfect",
+    "imagem": "https://wikimon.net/images/7/70/Lilimon_vb.png"
+  },
+  {
+    "id": 17,
+    "nome": "Zudomon",
+    "tipo": "Vaccine",
+    "atributo": "Aquan",
+    "campos": ["Deep Savers", "Metal Empire"],
+    "nivel": "Perfect",
+    "imagem": "https://wikimon.net/images/8/83/Zudomon_vb.png"
+  },
+  {
+    "id": 18,
+    "nome": "MagnaAngemon",
+    "tipo": "Vaccine",
+    "atributo": "Angel",
+    "campos": ["Virus Busters"],
+    "nivel": "Perfect",
+    "imagem": "https://wikimon.net/images/0/0b/Holyangemon_vb.png"
+  },
+  {
+    "id": 19,
+    "nome": "WarGreymon",
+    "tipo": "Vaccine",
+    "atributo": "Dragon Man",
+    "campos": ["Dragon's Roar", "Metal Empire", "Virus Busters"],
+    "nivel": "Ultimate",
+    "imagem": "https://wikimon.net/images/2/2e/Wargreymon_vb.png"
+  },
+  {
+    "id": 20,
+    "nome": "MetalGarurumon",
+    "tipo": "Vaccine",
+    "atributo": "Android",
+    "campos": ["Metal Empire", "Nature Spirits", "Virus Busters"],
+    "nivel": "Ultimate",
+    "imagem": "https://wikimon.net/images/8/8b/Metalgarurumon_vb.png"
+  }
+]
+
