@@ -25,20 +25,30 @@ function clearAlert() {
 }
 
 function createCard(d) {
-  const camposBadges = (d.campos || [])
-    .map((c) => `<span class="badge badge-digimon me-1 mb-1">${c}</span>`) 
+  const tipos = Array.isArray(d.tipos) && d.tipos.length ? d.tipos : (d.tipo ? [d.tipo] : []);
+  const atributos = Array.isArray(d.atributos) && d.atributos.length ? d.atributos : (d.atributo ? [d.atributo] : []);
+  const niveis = Array.isArray(d.niveis) && d.niveis.length ? d.niveis : (d.nivel ? [d.nivel] : []);
+
+  const camposDetalhes = Array.isArray(d.camposDetalhes) && d.camposDetalhes.length ? d.camposDetalhes : (d.campos || []).map((nome) => ({ nome, imagem: null }));
+  const camposBadges = camposDetalhes
+    .map((c) => c.imagem
+      ? `<span class="me-1 mb-1 d-inline-flex align-items-center"><img src="${c.imagem}" alt="${c.nome}" title="${c.nome}" style="height:20px;width:20px;object-fit:contain;margin-right:6px;"/><span class="badge badge-digimon">${c.nome}</span></span>`
+      : `<span class="badge badge-digimon me-1 mb-1">${c.nome}</span>`
+    )
     .join('');
+
+  const imgSrc = Array.isArray(d.imagens) && d.imagens.length ? d.imagens[0] : d.imagem;
 
   return `
   <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
     <div class="card h-100">
-      <img src="${d.imagem}" class="card-img-top p-3" alt="Imagem de ${d.nome}" height="220" />
+      <img src="${imgSrc}" class="card-img-top p-3" alt="Imagem de ${d.nome}" height="220" />
       <div class="card-body">
         <h5 class="card-title">${d.nome}</h5>
-        <p class="card-text mb-1"><strong>Tipo:</strong> ${d.tipo}</p>
-        <p class="card-text mb-1"><strong>Atributo:</strong> ${d.atributo}</p>
-        <p class="card-text mb-1"><strong>Nível:</strong> ${d.nivel}</p>
-        <div class="mt-2"><strong>Campos:</strong><div class="mt-1">${camposBadges}</div></div>
+        <p class="card-text mb-1"><strong>Tipos:</strong> ${tipos.join(', ') || '—'}</p>
+        <p class="card-text mb-1"><strong>Atributos:</strong> ${atributos.join(', ') || '—'}</p>
+        <p class="card-text mb-1"><strong>Níveis:</strong> ${niveis.join(', ') || '—'}</p>
+        <div class="mt-2"><strong>Campos:</strong><div class="mt-1">${camposBadges || '—'}</div></div>
       </div>
     </div>
   </div>`;

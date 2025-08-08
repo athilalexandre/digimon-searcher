@@ -12,7 +12,7 @@ const path = require('path');
 // Carrega dados locais do arquivo JSON
 const digimonsDataPath = path.join(__dirname, 'data', 'digimons.json');
 // require faz cache em memória — ótimo para dataset estático
-const digimons = require(digimonsDataPath);
+let digimons = require(digimonsDataPath);
 
 // Cria app
 const app = express();

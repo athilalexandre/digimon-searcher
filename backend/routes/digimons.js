@@ -26,7 +26,10 @@ router.get('/nivel/:nivel', (req, res) => {
   const { digimons, normalizar } = req.app.locals;
   const nivelParam = normalizar(req.params.nivel);
 
-  const filtrados = digimons.filter((d) => normalizar(d.nivel) === nivelParam);
+  const filtrados = digimons.filter((d) => {
+    const niveis = Array.isArray(d.niveis) && d.niveis.length > 0 ? d.niveis : [d.nivel].filter(Boolean);
+    return niveis.some((n) => normalizar(n) === nivelParam);
+  });
 
   if (filtrados.length === 0) {
     return res.status(404).json({
@@ -43,7 +46,10 @@ router.get('/tipo/:tipo', (req, res) => {
   const { digimons, normalizar } = req.app.locals;
   const tipoParam = normalizar(req.params.tipo);
 
-  const filtrados = digimons.filter((d) => normalizar(d.tipo) === tipoParam);
+  const filtrados = digimons.filter((d) => {
+    const tipos = Array.isArray(d.tipos) && d.tipos.length > 0 ? d.tipos : [d.tipo].filter(Boolean);
+    return tipos.some((t) => normalizar(t) === tipoParam);
+  });
 
   if (filtrados.length === 0) {
     return res.status(404).json({
