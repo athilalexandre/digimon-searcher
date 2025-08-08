@@ -82,6 +82,10 @@ function mapDetailToLocal(detail) {
     niveis,
     imagem: imagens[0] || null,
     imagens,
+    descricoes: Array.isArray(detail.descriptions) ? detail.descriptions : [],
+    tecnicas: Array.isArray(detail.skills)
+      ? detail.skills.map((s) => ({ id: s.id, nome: s.skill, traducao: s.translation || '', descricao: s.description || '' }))
+      : [],
     fonte: 'digi-api.com'
   };
 }

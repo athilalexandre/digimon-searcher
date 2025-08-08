@@ -37,9 +37,9 @@ router.get('/busca', (req, res) => {
       ? atributos.some((a) => normalizar(a) === atributoN)
       : true;
 
-    const camposLista = Array.isArray(d.campos) && d.campos.length > 0 ? d.campos : [];
+    const categoriasLista = Array.isArray(d.campos) && d.campos.length > 0 ? d.campos : [];
     const camposOk = campoN
-      ? camposLista.some((c) => normalizar(c) === campoN)
+      ? categoriasLista.some((c) => normalizar(c) === campoN)
       : true;
 
     return nomeOk && nivelOk && tipoOk && atributoOk && camposOk;

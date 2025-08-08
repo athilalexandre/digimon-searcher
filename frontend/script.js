@@ -1,6 +1,7 @@
 // Script da Landing Page – Consome a API local em http://localhost:3000
 
 const API_BASE = 'http://localhost:3000';
+const USER_LANG = (window.USER_LANG || 'en').slice(0, 2);
 
 const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
@@ -49,7 +50,7 @@ function createCard(d) {
         <p class="card-text mb-1"><strong>Tipos:</strong> ${tipos.join(', ') || '—'}</p>
         <p class="card-text mb-1"><strong>Atributos:</strong> ${atributos.join(', ') || '—'}</p>
         <p class="card-text mb-1"><strong>Níveis:</strong> ${niveis.join(', ') || '—'}</p>
-        <div class="mt-2"><strong>Campos:</strong><div class="mt-1">${camposBadges || '—'}</div></div>
+        <div class="mt-2"><strong>Categoria:</strong><div class="mt-1">${camposBadges || '—'}</div></div>
       </div>
     </div>
   </div>`;
@@ -87,11 +88,24 @@ async function openDetails(nome) {
     const modalEl = document.getElementById('digimonModal');
     document.getElementById('digimonModalLabel').textContent = d.nome;
     document.getElementById('digimonModalImg').src = (Array.isArray(d.imagens) && d.imagens[0]) || d.imagem || '';
-    document.getElementById('digimonModalDesc').textContent = d.descricao || 'Descrição não disponível em português no momento.';
+    // Seleciona descrição pela língua do usuário se estiver disponível (da DAPI)
+    let desc = '';
+    if (Array.isArray(d.descricoes) && d.descricoes.length) {
+      // Tentativas: pt -> en -> jap -> primeira
+      const prefer = USER_LANG === 'pt' ? ['pt', 'en', 'jap'] : USER_LANG === 'ja' ? ['jap', 'en', 'pt'] : ['en', 'pt', 'jap'];
+      for (const lang of prefer) {
+        const found = d.descricoes.find((x) => (x.language || '').toLowerCase().startsWith(lang));
+        if (found && found.description) { desc = found.description; break; }
+      }
+      if (!desc) desc = d.descricoes[0].description || '';
+    }
+    // Fallback para descrição extraída do Wikimon
+    if (!desc) desc = d.descricao || '';
+    document.getElementById('digimonModalDesc').textContent = desc || 'Descrição não disponível para o seu idioma.';
 
-    const techs = Array.isArray(d.ataques) ? d.ataques : [];
+    const techs = Array.isArray(d.tecnicas) && d.tecnicas.length ? d.tecnicas : (Array.isArray(d.ataques) ? d.ataques : []);
     const techsHtml = techs.slice(0, 10)
-      .map((t) => `<div class="mb-2"><strong>${t.nome}:</strong> ${t.descricao}</div>`)
+      .map((t) => `<div class="mb-2"><strong>${t.nome}:</strong> ${t.descricao || t.translation || t.traducao || ''}</div>`)
       .join('');
     document.getElementById('digimonModalTechs').innerHTML = techsHtml || '<span class="text-secondary">Sem técnicas registradas.</span>';
 
