@@ -1,15 +1,43 @@
 # Digimon Searcher
 
-Projeto full-stack com API (backend) em Node.js/Express e Landing Page (frontend) em HTML/CSS/JS para exibir informações de Digimons do jogo Digimon Story: Cyber Sleuth.
+Uma solução full‑stack moderna para consulta de Digimons com dados da DAPI e enriquecimento opcional pelo Wikimon, oferecendo busca rápida, filtros, paginação e visual de detalhes em modal responsivo.
 
-## Estrutura do projeto
+## Índice
+- [Visão Geral](#visão-geral)
+- [Funcionalidades](#funcionalidades)
+- [Arquitetura](#arquitetura)
+- [Instalação e Execução](#instalação-e-execução)
+- [API (Endpoints)](#api-endpoints)
+- [Frontend](#frontend)
+- [Sincronização de Dados](#sincronização-de-dados)
+- [Licença](#licença)
 
+## Visão Geral
+O projeto é composto por:
+- Backend em Node.js + Express, com CORS, paginação, filtros e middleware de erros.
+- Dataset local em `JSON` com imagens, categorias (fields), tipos, atributos e níveis.
+- Scripts de sincronização com a DAPI e enriquecimento com o Wikimon.
+- Frontend estático (HTML/CSS/JS + Bootstrap) consumindo a API e exibindo detalhes em modal.
+
+## Funcionalidades
+Para usuários:
+- Busca por nome (parcial, case-insensitive, tolerante a acentos)
+- Filtro por nível e listagem com paginação
+- Detalhes do Digimon em modal com imagem, descrição e técnicas
+- Exibição de categorias (fields) com ícones
+
+Para manutenção:
+- Sync automático no primeiro start ou sob demanda
+- Download local de imagens (opcional) e enriquecimento a partir do Wikimon
+
+## Arquitetura
 ```
 /backend
-  app.js
-  routes/
-  data/digimons.json
-  README.md
+  app.js               # servidor Express
+  scripts/             # sync, bootstrap, enriquecimento, download de imagens
+  routes/digimons.js   # rotas da API
+  data/digimons.json   # dataset local
+  public/              # imagens locais (opcional)
 
 /frontend
   index.html
@@ -17,29 +45,45 @@ Projeto full-stack com API (backend) em Node.js/Express e Landing Page (frontend
   script.js
 ```
 
-## Requisitos
-- Node.js 18+
+## Instalação e Execução
+Pré‑requisito: Node.js 18+
 
-## Como rodar a API (Backend)
-1. Abra um terminal na raiz do projeto e execute:
-   ```bash
-   cd backend
-   npm install
-   npm run dev
-   ```
-2. A API iniciará em `http://localhost:3000`.
+Backend:
+```bash
+cd backend
+npm install
+npm start    # inicia com bootstrap (sincroniza se necessário) e sobe a API em http://localhost:3000
+```
 
-### Endpoints principais
-- `GET /digimons?page=<num>&limit=<num>` – Lista paginada
-- `GET /digimons/:nome` – Busca por nome (case-insensitive e tolerante a acentos)
-- `GET /digimons/nivel/:nivel` – Filtra por nível
-- `GET /digimons/tipo/:tipo` – Filtra por tipo
+Frontend:
+```bash
+cd frontend
+npm install
+npm run dev  # http://localhost:5173
+```
 
-## Como usar o Frontend
-1. Com a API rodando em `http://localhost:3000`, abra o arquivo `frontend/index.html` no navegador.
-2. Utilize o campo de busca para procurar por nome e o seletor para filtrar por nível.
+## API (Endpoints)
+- `GET /digimons?page=<num>&limit=<num>`: lista paginada
+- `GET /digimons/:nome`: por nome (case-insensitive, tolerante a acentos)
+- `GET /digimons/nivel/:nivel`: por nível
+- `GET /digimons/tipo/:tipo`: por tipo
+- `GET /digimons/busca?nome=&nivel=&tipo=&atributo=&campo=&page=&limit=`: busca flexível
 
-## Observações
-- CORS está habilitado no backend para permitir o consumo pelo frontend
-- Mensagens e documentação em português
-- Design inspirado nas cores e estilo da franquia Digimon
+## Frontend
+- Busca por nome e filtro por nível
+- Cards responsivos; clique abre modal com:
+  - imagem (Wikimon/DAPI/local)
+  - descrição no idioma do navegador (pt/en/ja com fallback)
+  - técnicas (quando disponíveis)
+
+## Sincronização de Dados
+- `npm start` (backend) executa um bootstrap que valida o dataset e sincroniza quando necessário.
+- Comandos úteis:
+```bash
+npm run sync           # baixa todos os Digimons da DAPI
+npm run images         # baixa imagens localmente e atualiza caminhos para /static
+npm run enrich:wikimon # enriquece com imagem/descrição/técnicas do Wikimon
+```
+
+## Licença
+CC BY‑NC‑SA 4.0 – Projeto educacional, sem afiliação oficial com Bandai. Fontes: DAPI (digi-api.com) e Wikimon (wikimon.net).
