@@ -3,7 +3,12 @@ const digimons = require(path.join(process.cwd(), 'backend', 'data', 'digimons.j
 
 function normalizar(texto) {
   if (typeof texto !== 'string') return '';
-  return texto.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().trim();
+  return texto
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '') // remove não alfanum
+    .trim();
 }
 
 module.exports = async (req, res) => {
@@ -41,7 +46,7 @@ module.exports = async (req, res) => {
     if (!encontrado) {
       encontrado = digimons.find((d) => normalizar(d.nome).includes(nomeParam));
     }
-    // fallback: tenta remover conteúdos entre parênteses
+    // fallback: tenta remover conteúdos entre parênteses (ex.: "Lucemon (Satan Mode)")
     if (!encontrado && /\(.*\)/.test(nomeRaw)) {
       const base = nomeRaw.replace(/\s*\(.+?\)\s*/g, '').trim();
       const baseNorm = normalizar(base);
