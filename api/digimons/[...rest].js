@@ -34,8 +34,20 @@ module.exports = async (req, res) => {
     }
 
     // /:nome
-    const nomeParam = normalizar(decodeURIComponent(parts[0] || ''));
-    const encontrado = digimons.find((d) => normalizar(d.nome) === nomeParam);
+    const nomeRaw = decodeURIComponent(parts[0] || '');
+    const nomeParam = normalizar(nomeRaw);
+    let encontrado = digimons.find((d) => normalizar(d.nome) === nomeParam);
+    // fallback: tenta contains quando não houver match exato
+    if (!encontrado) {
+      encontrado = digimons.find((d) => normalizar(d.nome).includes(nomeParam));
+    }
+    // fallback: tenta remover conteúdos entre parênteses
+    if (!encontrado && /\(.*\)/.test(nomeRaw)) {
+      const base = nomeRaw.replace(/\s*\(.+?\)\s*/g, '').trim();
+      const baseNorm = normalizar(base);
+      encontrado = digimons.find((d) => normalizar(d.nome) === baseNorm) ||
+        digimons.find((d) => normalizar(d.nome).includes(baseNorm));
+    }
     if (!encontrado) return send404(res, 'Digimon não encontrado.');
     return sendJSON(res, encontrado);
   } catch (e) {
