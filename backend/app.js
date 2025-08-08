@@ -21,6 +21,13 @@ const app = express();
 app.use(cors()); // Habilita CORS para permitir acesso do frontend
 app.use(express.json()); // Trata JSON no corpo das requisições
 app.use(morgan('dev')); // Log amigável em desenvolvimento
+// Servir arquivos estáticos (imagens baixadas localmente)
+app.use('/static', express.static(path.join(__dirname, 'public'), {
+  maxAge: '7d',
+  setHeaders: (res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
+}));
 
 // Função utilitária para normalizar strings (case-insensitive e sem acentos)
 function normalizar(texto) {

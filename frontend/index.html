@@ -43,6 +43,23 @@
           </div>
         </div>
         <div id="cardsContainer" class="row g-3"></div>
+        <template id="detailsTemplate">
+          <div class="modal fade" id="digimonModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+              <div class="modal-content bg-digimon text-light">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="digimonModalLabel"></h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <img id="digimonModalImg" class="img-fluid mb-3" alt="Imagem do Digimon" />
+                  <p id="digimonModalDesc" class="mb-3"></p>
+                  <div id="digimonModalTechs"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
       </section>
     </main>
 

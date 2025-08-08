@@ -2,6 +2,63 @@ const express = require('express');
 
 const router = express.Router();
 
+// GET /digimons/busca?nome=&nivel=&tipo=&atributo=&campo=&page=&limit=
+// Busca flexível por múltiplos critérios (case-insensitive e tolerante a acentos)
+router.get('/busca', (req, res) => {
+  const { digimons, normalizar } = req.app.locals;
+  const {
+    nome = '', nivel = '', tipo = '', atributo = '', campo = '',
+    page = '1', limit = '20'
+  } = req.query;
+
+  const nomeN = normalizar(String(nome));
+  const nivelN = normalizar(String(nivel));
+  const tipoN = normalizar(String(tipo));
+  const atributoN = normalizar(String(atributo));
+  const campoN = normalizar(String(campo));
+
+  const filtrados = digimons.filter((d) => {
+    const nomeOk = nomeN
+      ? normalizar(d.nome).includes(nomeN)
+      : true;
+
+    const niveis = Array.isArray(d.niveis) && d.niveis.length > 0 ? d.niveis : [d.nivel].filter(Boolean);
+    const nivelOk = nivelN
+      ? niveis.some((n) => normalizar(n) === nivelN)
+      : true;
+
+    const tipos = Array.isArray(d.tipos) && d.tipos.length > 0 ? d.tipos : [d.tipo].filter(Boolean);
+    const tipoOk = tipoN
+      ? tipos.some((t) => normalizar(t) === tipoN)
+      : true;
+
+    const atributos = Array.isArray(d.atributos) && d.atributos.length > 0 ? d.atributos : [d.atributo].filter(Boolean);
+    const atributoOk = atributoN
+      ? atributos.some((a) => normalizar(a) === atributoN)
+      : true;
+
+    const camposLista = Array.isArray(d.campos) && d.campos.length > 0 ? d.campos : [];
+    const camposOk = campoN
+      ? camposLista.some((c) => normalizar(c) === campoN)
+      : true;
+
+    return nomeOk && nivelOk && tipoOk && atributoOk && camposOk;
+  });
+
+  const pageNum = Math.max(parseInt(page, 10) || 1, 1);
+  const limitNum = Math.max(parseInt(limit, 10) || 20, 1);
+  const startIndex = (pageNum - 1) * limitNum;
+  const endIndex = startIndex + limitNum;
+  const resultados = filtrados.slice(startIndex, endIndex);
+
+  return res.json({
+    pagina: pageNum,
+    limite: limitNum,
+    total: filtrados.length,
+    resultados
+  });
+});
+
 // GET /digimons → retorna todos com paginação
 router.get('/', (req, res) => {
   const { digimons } = req.app.locals;

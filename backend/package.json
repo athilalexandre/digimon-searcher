@@ -4,16 +4,19 @@
   "description": "API para servir informações de Digimons do jogo Digimon Story: Cyber Sleuth",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
-    "sync": "node scripts/sync.js"
+    "start": "node scripts/bootstrap.js",
+    "dev": "nodemon scripts/bootstrap.js",
+    "sync": "node scripts/sync.js",
+    "images": "node scripts/download_images.js",
+    "enrich:wikimon": "node scripts/enrich_wikimon.js"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.19.2",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "cheerio": "^1.0.0-rc.12"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"

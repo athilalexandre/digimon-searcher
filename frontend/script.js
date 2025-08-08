@@ -10,6 +10,7 @@ const alertArea = document.getElementById('alertArea');
 const prevPageBtn = document.getElementById('prevPage');
 const nextPageBtn = document.getElementById('nextPage');
 const pageInfo = document.getElementById('pageInfo');
+const detailsTemplate = document.getElementById('detailsTemplate');
 
 let currentPage = 1;
 let currentLimit = 8;
@@ -41,7 +42,7 @@ function createCard(d) {
 
   return `
   <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-    <div class="card h-100">
+    <div class="card h-100 digimon-card" data-nome="${d.nome}">
       <img src="${imgSrc}" class="card-img-top p-3" alt="Imagem de ${d.nome}" height="220" />
       <div class="card-body">
         <h5 class="card-title">${d.nome}</h5>
@@ -64,10 +65,47 @@ function renderList(resultados = [], pagina = 1, total = 0, limite = currentLimi
 
   clearAlert();
   cardsContainer.innerHTML = resultados.map(createCard).join('');
+  // Vincula clique aos cards para abrir detalhes
+  document.querySelectorAll('.digimon-card').forEach((el) => {
+    el.addEventListener('click', () => openDetails(el.getAttribute('data-nome')));
+  });
   const totalPages = Math.ceil(total / limite);
   pageInfo.textContent = `Página ${pagina} de ${totalPages}`;
   prevPageBtn.disabled = pagina <= 1;
   nextPageBtn.disabled = pagina >= totalPages;
+}
+
+async function openDetails(nome) {
+  try {
+    const res = await fetch(`${API_BASE}/digimons/${encodeURIComponent(nome)}`);
+    if (!res.ok) throw new Error('Falha ao carregar detalhes.');
+    const d = await res.json();
+
+    // Modal
+    const tpl = detailsTemplate.content.cloneNode(true);
+    document.body.appendChild(tpl);
+    const modalEl = document.getElementById('digimonModal');
+    document.getElementById('digimonModalLabel').textContent = d.nome;
+    document.getElementById('digimonModalImg').src = (Array.isArray(d.imagens) && d.imagens[0]) || d.imagem || '';
+    document.getElementById('digimonModalDesc').textContent = d.descricao || 'Descrição não disponível em português no momento.';
+
+    const techs = Array.isArray(d.ataques) ? d.ataques : [];
+    const techsHtml = techs.slice(0, 10)
+      .map((t) => `<div class="mb-2"><strong>${t.nome}:</strong> ${t.descricao}</div>`)
+      .join('');
+    document.getElementById('digimonModalTechs').innerHTML = techsHtml || '<span class="text-secondary">Sem técnicas registradas.</span>';
+
+    // Usa Bootstrap JS se presente; fallback simples
+    try {
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+      modalEl.addEventListener('hidden.bs.modal', () => modalEl.remove());
+    } catch {
+      modalEl.style.display = 'block';
+    }
+  } catch (err) {
+    showAlert(err.message || 'Erro ao carregar detalhes.', 'danger');
+  }
 }
 
 async function fetchPage(page = 1) {
@@ -89,16 +127,17 @@ async function fetchByName(name) {
     return;
   }
   try {
-    const res = await fetch(`${API_BASE}/digimons/${encodeURIComponent(trimmed)}`);
-    if (res.status === 404) {
-      showAlert('Não encontramos esse Digimon. Verifique o nome e tente novamente.');
+    // Usa busca flexível (parcial, case-insensitive, tolerante a acentos)
+    const res = await fetch(`${API_BASE}/digimons/busca?nome=${encodeURIComponent(trimmed)}&page=1&limit=${currentLimit}`);
+    if (!res.ok) throw new Error('Falha ao buscar Digimon.');
+    const data = await res.json();
+    if (!data.resultados || data.resultados.length === 0) {
+      showAlert('Não encontramos esse Digimon. Tente outro nome ou ajuste os filtros.');
       cardsContainer.innerHTML = '';
       pageInfo.textContent = '';
       return;
     }
-    if (!res.ok) throw new Error('Falha ao buscar Digimon.');
-    const data = await res.json();
-    renderList([data], 1, 1, 1);
+    renderList(data.resultados, data.pagina, data.total, data.limite);
   } catch (err) {
     showAlert(err.message || 'Erro ao comunicar com a API.', 'danger');
   }
