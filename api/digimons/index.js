@@ -13,7 +13,7 @@ function normalizar(texto) {
 
 module.exports = (req, res) => {
   try {
-    const url = new URL(req.url, `http://${req.headers.host}`);
+    const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
     const page = Math.max(parseInt(url.searchParams.get('page') || '1', 10), 1);
     const limit = Math.max(parseInt(url.searchParams.get('limit') || '20', 10), 1);
 

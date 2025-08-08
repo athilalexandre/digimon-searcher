@@ -6,13 +6,7 @@
   --digimon-yellow: #ffc107;
 }
 
-@font-face {
-  font-family: 'Mozilla Headline';
-  src: url('https://assets.mozilla.net/fonts/zilla-slab/Zilla-Slab-Bold.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
+/* Removido @font-face que causava 404 em produção. A fonte é aplicada via @import Google (fallbacks inclusos). */
 
 html,
 body {

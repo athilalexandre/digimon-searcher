@@ -32,6 +32,7 @@ function distance(a, b) {
 module.exports = async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+    // req.query pode vir vazio em Vercel Node 20; usa parsing manual
     const { rest = [] } = req.query || {};
     let parts = Array.isArray(rest) ? rest : [rest];
     // Vercel pode fornecer "rest" como string única "nivel/Ultimate"
@@ -42,6 +43,7 @@ module.exports = async (req, res) => {
     // /nivel/:nivel
     if (parts[0] === 'nivel') {
       const nivelParam = normalizar(parts[1] || '');
+      if (!nivelParam) return send404(res, 'Nível inválido.');
       const filtrados = digimons.filter((d) => {
         const niveis = Array.isArray(d.niveis) && d.niveis.length > 0 ? d.niveis : [d.nivel].filter(Boolean);
         return niveis.some((n) => normalizar(n) === nivelParam);
@@ -58,6 +60,7 @@ module.exports = async (req, res) => {
     // /tipo/:tipo
     if (parts[0] === 'tipo') {
       const tipoParam = normalizar(parts[1] || '');
+      if (!tipoParam) return send404(res, 'Tipo inválido.');
       const filtrados = digimons.filter((d) => {
         const tipos = Array.isArray(d.tipos) && d.tipos.length > 0 ? d.tipos : [d.tipo].filter(Boolean);
         return tipos.some((t) => normalizar(t) === tipoParam);
