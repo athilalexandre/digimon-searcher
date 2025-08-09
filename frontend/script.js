@@ -138,9 +138,23 @@ function renderList(resultados = [], pagina = 1, total = 0, limite = currentLimi
 
 async function openDetails(nome, cardImgSrc) {
   try {
-    const res = await apiFetch(`${API_BASE}/digimons/${encodeURIComponent(nome)}`);
-    if (!res.ok) throw new Error('Falha ao carregar detalhes.');
-    const d = await res.json();
+    let res = await apiFetch(`${API_BASE}/digimons/${encodeURIComponent(nome)}`);
+    let d;
+    if (res.status === 404) {
+      // Fallback: tenta buscar e pegar o primeiro resultado semelhante
+      const resSearch = await apiFetch(`${API_BASE}/digimons/busca?nome=${encodeURIComponent(nome)}&page=1&limit=1`);
+      if (resSearch.ok) {
+        const dataS = await resSearch.json();
+        if (dataS.resultados && dataS.resultados[0]) {
+          d = dataS.resultados[0];
+        }
+      }
+      if (!d) throw new Error('Falha ao carregar detalhes.');
+    } else if (!res.ok) {
+      throw new Error('Falha ao carregar detalhes.');
+    } else {
+      d = await res.json();
+    }
     console.log('[modal] loaded digimon details', { nome: d.nome, imagens: d.imagens?.length || 0 });
 
     // Modal

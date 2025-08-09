@@ -97,14 +97,14 @@ module.exports = async (req, res) => {
         digimons.find((d) => normalizar(d.nome).includes(baseNorm));
     }
     if (!encontrado) {
-      // fuzzy: aceita distância <= 2
+      // fuzzy: aceita distância <= 3 (mais permissivo para nomes com hífen/espaços)
       let best = null; let bestScore = Infinity;
       for (const d of digimons) {
         const dn = normalizar(d.nome);
         const dist = distance(dn, nomeParam);
         if (dist < bestScore) { best = d; bestScore = dist; }
       }
-      if (best && bestScore <= 2) encontrado = best;
+      if (best && bestScore <= 3) encontrado = best;
     }
     if (!encontrado) {
       log.warn('digimon not found', { nome: nomeRaw, parts });
