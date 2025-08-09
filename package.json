@@ -1,0 +1,16 @@
+{
+  "name": "digimon-searcher-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Scripts raiz para rodar backend e frontend juntos",
+  "scripts": {
+    "install:all": "npm --prefix backend install && npm --prefix frontend install",
+    "dev": "concurrently -n back,front -c green,cyan \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
+    "start": "concurrently -n back,front -c green,cyan \"npm --prefix backend start\" \"npm --prefix frontend start\""
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
+
+
