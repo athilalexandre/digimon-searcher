@@ -41,6 +41,19 @@ module.exports = async (req, res) => {
       parts = parts[0].split('/').filter(Boolean);
     }
 
+    // /busca?nome=&page=&limit=
+    if (parts[0] === 'busca') {
+      const nome = normalizar(url.searchParams.get('nome') || '');
+      const page = Math.max(parseInt(url.searchParams.get('page') || '1', 10), 1);
+      const limit = Math.max(parseInt(url.searchParams.get('limit') || '8', 10), 1);
+      const filtrados = digimons.filter((d) => normalizar(d.nome).includes(nome));
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      const resultados = filtrados.slice(startIndex, endIndex);
+      log.info('search (catch-all)', { nome, page, limit, total: filtrados.length, returned: resultados.length });
+      return sendJSON(res, { pagina: page, limite: limit, total: filtrados.length, resultados });
+    }
+
     // /nivel/:nivel
     if (parts[0] === 'nivel') {
       const nivelParam = normalizar(parts[1] || '');
