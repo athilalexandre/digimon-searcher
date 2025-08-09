@@ -1,4 +1,5 @@
 const path = require('path');
+const log = require('../_utils/log');
 const digimons = require(path.resolve(__dirname, '../../backend/data/digimons.json'));
 
 function normalizar(texto) {
@@ -48,12 +49,16 @@ module.exports = async (req, res) => {
         const niveis = Array.isArray(d.niveis) && d.niveis.length > 0 ? d.niveis : [d.nivel].filter(Boolean);
         return niveis.some((n) => normalizar(n) === nivelParam);
       });
-      if (filtrados.length === 0) return send404(res, 'Nenhum Digimon encontrado para o nível informado.');
+      if (filtrados.length === 0) {
+        log.warn('level filter empty', { nivel: parts[1] });
+        return send404(res, 'Nenhum Digimon encontrado para o nível informado.');
+      }
       const page = Math.max(parseInt(url.searchParams.get('page') || '1', 10), 1);
       const limit = Math.max(parseInt(url.searchParams.get('limit') || '8', 10), 1);
       const startIndex = (page - 1) * limit;
       const endIndex = startIndex + limit;
       const resultados = filtrados.slice(startIndex, endIndex);
+      log.info('level filter', { nivel: parts[1], page, limit, total: filtrados.length, returned: resultados.length });
       return sendJSON(res, { pagina: page, limite: limit, total: filtrados.length, resultados });
     }
 
@@ -65,12 +70,16 @@ module.exports = async (req, res) => {
         const tipos = Array.isArray(d.tipos) && d.tipos.length > 0 ? d.tipos : [d.tipo].filter(Boolean);
         return tipos.some((t) => normalizar(t) === tipoParam);
       });
-      if (filtrados.length === 0) return send404(res, 'Nenhum Digimon encontrado para o tipo informado.');
+      if (filtrados.length === 0) {
+        log.warn('type filter empty', { tipo: parts[1] });
+        return send404(res, 'Nenhum Digimon encontrado para o tipo informado.');
+      }
       const page = Math.max(parseInt(url.searchParams.get('page') || '1', 10), 1);
       const limit = Math.max(parseInt(url.searchParams.get('limit') || '8', 10), 1);
       const startIndex = (page - 1) * limit;
       const endIndex = startIndex + limit;
       const resultados = filtrados.slice(startIndex, endIndex);
+      log.info('type filter', { tipo: parts[1], page, limit, total: filtrados.length, returned: resultados.length });
       return sendJSON(res, { pagina: page, limite: limit, total: filtrados.length, resultados });
     }
 
@@ -97,9 +106,14 @@ module.exports = async (req, res) => {
       }
       if (best && bestScore <= 2) encontrado = best;
     }
-    if (!encontrado) return send404(res, 'Digimon não encontrado.');
+    if (!encontrado) {
+      log.warn('digimon not found', { nome: nomeRaw, parts });
+      return send404(res, 'Digimon não encontrado.');
+    }
+    log.info('digimon details', { nome: encontrado.nome });
     return sendJSON(res, encontrado);
   } catch (e) {
+    log.error('details route failed', { message: e.message, stack: e.stack });
     res.statusCode = 500;
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({ erro: 'Erro interno do servidor', detalhes: e.message }));

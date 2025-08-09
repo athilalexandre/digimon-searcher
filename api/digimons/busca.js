@@ -1,4 +1,5 @@
 const path = require('path');
+const log = require('../_utils/log');
 const digimons = require(path.resolve(__dirname, '../../backend/data/digimons.json'));
 
 function normalizar(texto) {
@@ -23,10 +24,12 @@ module.exports = (req, res) => {
     const endIndex = startIndex + limit;
     const resultados = filtrados.slice(startIndex, endIndex);
 
+    log.info('search digimons', { nome, page, limit, total: filtrados.length, returned: resultados.length });
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({ pagina: page, limite: limit, total: filtrados.length, resultados }));
   } catch (e) {
+    log.error('search digimons failed', { message: e.message, stack: e.stack });
     res.statusCode = 500;
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({ erro: 'Erro interno do servidor', detalhes: e.message }));

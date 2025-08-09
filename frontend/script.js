@@ -4,6 +4,27 @@ const API_BASE = (typeof window !== 'undefined' && window.location.hostname === 
   ? 'http://localhost:3000'
   : '/api';
 const USER_LANG = (window.USER_LANG || 'en').slice(0, 2);
+// Wrapper de fetch com logs avançados
+async function apiFetch(url, options) {
+  try {
+    console.groupCollapsed('[api][request]');
+    console.log('url:', url);
+    if (options) console.log('options:', options);
+    console.groupEnd();
+    const start = performance.now();
+    const res = await fetch(url, options);
+    const dur = Math.round(performance.now() - start);
+    console.groupCollapsed('[api][response]');
+    console.log('url:', res.url);
+    console.log('status:', res.status, res.statusText);
+    console.log('durationMs:', dur);
+    console.groupEnd();
+    return res;
+  } catch (err) {
+    console.error('[api][error]', { url, message: err?.message, stack: err?.stack });
+    throw err;
+  }
+}
 
 const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
@@ -117,7 +138,7 @@ function renderList(resultados = [], pagina = 1, total = 0, limite = currentLimi
 
 async function openDetails(nome, cardImgSrc) {
   try {
-    const res = await fetch(`${API_BASE}/digimons/${encodeURIComponent(nome)}`);
+    const res = await apiFetch(`${API_BASE}/digimons/${encodeURIComponent(nome)}`);
     if (!res.ok) throw new Error('Falha ao carregar detalhes.');
     const d = await res.json();
     console.log('[modal] loaded digimon details', { nome: d.nome, imagens: d.imagens?.length || 0 });
@@ -164,7 +185,7 @@ async function openDetails(nome, cardImgSrc) {
     if (!desc) {
       try {
         const tryFetch = async (nome) => {
-          const wk = await fetch(`${API_BASE}/digimons/${encodeURIComponent(nome)}/detalhes-wikimon`);
+          const wk = await apiFetch(`${API_BASE}/digimons/${encodeURIComponent(nome)}/detalhes-wikimon`);
           if (!wk.ok) return null;
           return wk.json();
         };
@@ -264,7 +285,7 @@ async function openDetails(nome, cardImgSrc) {
 
 async function fetchPage(page = 1) {
   try {
-    const res = await fetch(`${API_BASE}/digimons?page=${page}&limit=${currentLimit}`);
+    const res = await apiFetch(`${API_BASE}/digimons?page=${page}&limit=${currentLimit}`);
     if (!res.ok) throw new Error('Falha ao carregar lista de Digimons.');
     const data = await res.json();
     currentMode = 'list';
@@ -279,7 +300,7 @@ async function fetchPage(page = 1) {
 async function fetchSearchPage(page = 1) {
   const name = currentQuery.name;
   const url = `${API_BASE}/digimons/busca?nome=${encodeURIComponent(name)}&page=${page}&limit=8`;
-  const res = await fetch(url);
+  const res = await apiFetch(url);
   if (!res.ok) throw new Error('Falha ao buscar Digimon.');
   const data = await res.json();
   currentMode = 'search';
@@ -296,7 +317,7 @@ async function fetchByName(name) {
   }
   try {
     currentQuery.name = trimmed;
-    const res = await fetch(`${API_BASE}/digimons/busca?nome=${encodeURIComponent(trimmed)}&page=1&limit=8`);
+    const res = await apiFetch(`${API_BASE}/digimons/busca?nome=${encodeURIComponent(trimmed)}&page=1&limit=8`);
     if (!res.ok) throw new Error('Falha ao buscar Digimon.');
     const data = await res.json();
     if (!data.resultados || data.resultados.length === 0) {
@@ -321,7 +342,7 @@ async function fetchByLevel(level, page = 1) {
     return;
   }
   try {
-    const res = await fetch(`${API_BASE}/digimons/nivel/${encodeURIComponent(trimmed)}?page=${page}&limit=8`);
+    const res = await apiFetch(`${API_BASE}/digimons/nivel/${encodeURIComponent(trimmed)}?page=${page}&limit=8`);
     if (res.status === 404) {
       showAlert('Nenhum Digimon encontrado para o nível selecionado.');
       cardsContainer.innerHTML = '';
